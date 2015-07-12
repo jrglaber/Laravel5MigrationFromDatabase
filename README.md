@@ -1,5 +1,5 @@
 # Laravel5MigrationFromDatabase
-Importa uma database para suas migrations, criando as migrations por tabela.
+Importar uma database já definida para suas migrations, criando as migrations por tabela.
 
 <b style="font-size: 20px;">Usage</b><br>
 <ul>
