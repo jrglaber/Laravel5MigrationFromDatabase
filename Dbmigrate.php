@@ -87,6 +87,7 @@ class SqlMigrations
 // NOTE Migration Created: " . date("Y-m-d H:i:s") . "
 // --------------------------------------------------
 
+use Illuminate\\Database\\Schema\\Blueprint;
 use Illuminate\\Database\\Migrations\\Migration;
 
 class Create" . str_replace('_', '', Str::title($name)) . "Table extends Migration {
@@ -172,7 +173,7 @@ public function down()
             }
 
             $down = "Schema::drop('{$value->table_name}');";
-            $up = "Schema::create('{$value->table_name}', function($" . "table) {\n";
+            $up = "Schema::create('{$value->table_name}', function(Blueprint $" . "table) {\n";
             $tableDescribes = self::getTableDescribes($value->table_name);
             foreach ($tableDescribes as $values) {
                 $method = "";
