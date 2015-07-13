@@ -31,7 +31,7 @@ class SqlMigrations
 
     private static function getTables()
     {
-        return DB::select('SELECT table_name FROM information_schema.tables WHERE table_schema="' . self::$database . '"');
+        return DB::select('SELECT table_name, create_time FROM information_schema.tables WHERE table_schema="' . self::$database . '" ORDER BY create_time ');
     }
 
     private static function getTableDescribes($table)
@@ -111,7 +111,9 @@ public function down()
 }
 }";
 
-            $filename = date('Y_m_d_His') . "_create_" . $name . "_table.php";
+            $date = new \DateTime($values['create']);
+            //$filename = date('Y_m_d_His') . "_create_" . $name . "_table.php";
+            $filename = $date->format('Y_m_d_His') . "_create_" . $name . "_table.php";
 
             file_put_contents(__DIR__ . "/../database/migrations/{$filename}", $schema);
             $schema = "";
@@ -243,7 +245,8 @@ public function down()
             $up .= " });\n\n";
             self::$schema[$value->table_name] = array(
                 'up' => $up,
-                'down' => $down
+                'down' => $down,
+                'create' => $value->create_time,
             );
         }
 
