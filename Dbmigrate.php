@@ -12,7 +12,7 @@ class Dbmigrate extends Model
     {
         $migrate = new SqlMigrations;
         //$migrate->ignore(['some_table_name', 'another_table_name']);
-        $migrate->convert('database');
+        $migrate->convert('nautica');
         $migrate->write();
     }
 }
@@ -57,7 +57,7 @@ class SqlMigrations
             ->where('CONSTRAINT_SCHEMA', '=', self::$database)
             ->where('REFERENCED_TABLE_SCHEMA', '=', self::$database)
             ->where('TABLE_NAME', '=', $table)
-            ->select('COLUMN_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
+            ->select('COLUMN_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME', 'CONSTRAINT_NAME')
             ->get();
     }
 
@@ -198,6 +198,7 @@ public function down()
                         $method = 'string';
                         break;
                     case 'float' :
+                    case 'double' :
                         $method = 'float';
                         break;
                     case 'decimal' :
@@ -244,7 +245,7 @@ public function down()
 
             $foreign = self::getForeigns($value->table_name);
             foreach ($foreign as $k => $v) {
-                $up .= " $" . "table->foreign('{$v->COLUMN_NAME}')->references('{$v->REFERENCED_COLUMN_NAME}')->on('{$v->REFERENCED_TABLE_NAME}');\n";
+                $up .= " $" . "table->foreign('{$v->COLUMN_NAME}', '$v->CONSTRAINT_NAME')->references('{$v->REFERENCED_COLUMN_NAME}')->on('{$v->REFERENCED_TABLE_NAME}');\n";
             }
 
             $up .= " });\n\n";
