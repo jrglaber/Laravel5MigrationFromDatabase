@@ -12,7 +12,7 @@ class Dbmigrate extends Model
     {
         $migrate = new SqlMigrations;
         //$migrate->ignore(['some_table_name', 'another_table_name']);
-        $migrate->convert('unegro');
+        $migrate->convert('database');
         $migrate->write();
     }
 }
@@ -67,6 +67,7 @@ class SqlMigrations
         $downSchema = "";
         $schema = "";
         $newSchema = "";
+        $count = 1;
         foreach (self::$schema as $name => $values) {
             if (in_array($name, self::$ignore)) {
                 continue;
@@ -114,12 +115,13 @@ public function down()
 
             $date = new \DateTime($values['create']);
             //$filename = date('Y_m_d_His') . "_create_" . $name . "_table.php";
-            $filename = $date->format('Y_m_d_His') . "_create_" . $name . "_table.php";
+            $filename = $date->format('Y_m_d_His') . $count . "_create_" . $name . "_table.php";
 
             file_put_contents(__DIR__ . "/../database/migrations/{$filename}", $schema);
             $schema = "";
             $upSchema = "";
             $downSchema = "";
+            $count++;
         }
         return $schema;
     }
@@ -181,11 +183,12 @@ public function down()
                 $type = $para > -1 ? substr($values->Type, 0, $para) : $values->Type;
                 $numbers = "";
                 $nullable = $values->Null == "NO" ? "" : "->nullable()";
-                $default = empty($values->Default) ? "" : "->default(\"{$values->Default}\")";
+                $default = ($values->Default == "" || is_null($values->Default)) ? "" : "->default(\"{$values->Default}\")";
                 $unsigned = strpos($values->Type, "unsigned") === false ? '' : '->unsigned()';
                 $unique = $values->Key == 'UNI' ? "->unique()" : "";
                 switch ($type) {
                     case 'int' :
+                    case 'year' :
                         $method = 'unsignedInteger';
                         break;
                     case 'char' :
@@ -201,6 +204,7 @@ public function down()
                         $para = strpos($values->Type, '(');
                         $numbers = ", " . substr($values->Type, $para + 1, -1);
                         $method = 'decimal';
+                        $default = "->default(\"{$values->Default}\")";
                         break;
                     case 'tinyint' :
                     case 'smallint' :
